@@ -1,18 +1,18 @@
-# tg-channel — Telegram plugin for Claude Code
+# tg-channel — Telegram-плагин для Claude Code
 
-MCP server that connects Claude Code to Telegram. Send a message → Claude thinks → replies, sets reactions, handles voice, photos, and files.
+MCP-сервер, который подключает Claude Code к Telegram. Отправляешь сообщение → Claude думает → отвечает, ставит реакции, обрабатывает голос, фото и файлы.
 
 ```
-You ──── Telegram ────► Claude Code ──► your codebase, tools, APIs
-         ◄────────────
+Ты ──── Telegram ────► Claude Code ──► твой код, инструменты, API
+        ◄────────────
 ```
 
-**What Claude can do via this plugin:**
-- `reply` — send text back (Markdown supported)
-- `react` — set emoji reaction on any message
-- `edit_message` — update a previously sent reply
-- `download_attachment` — read photos and documents you send
-- Voice messages: transcribed via Groq Whisper before Claude sees them
+**Что Claude умеет через этот плагин:**
+- `reply` — отправить ответ (поддерживается Markdown)
+- `react` — поставить эмодзи-реакцию на сообщение
+- `edit_message` — отредактировать уже отправленный ответ
+- `download_attachment` — прочитать фото или документ
+- Голосовые сообщения: расшифровываются через Groq Whisper до того, как Claude их видит
 
 ---
 
@@ -57,18 +57,20 @@ You ──── Telegram ────► Claude Code ──► your codebase, t
 
 > **Важно:** `--dangerously-skip-permissions` отключает запросы разрешений у Claude. Используй только в отдельной сессии для бота, не в основном рабочем пространстве.
 
+**Совместимость:** промпт работает на Linux и macOS. На Windows — только через [WSL](https://learn.microsoft.com/ru-ru/windows/wsl/install) или Git Bash (команды `chmod`, `export`, `curl | bash` недоступны в PowerShell/CMD).
+
 ---
 
-## Manual setup
+## Ручная установка
 
-### Prerequisites
+### Что нужно
 
 - [Bun](https://bun.sh) >= 1.0
 - Claude Code CLI (`npm i -g @anthropic/claude-code`)
-- A Telegram bot token from [@BotFather](https://t.me/BotFather)
+- Токен Telegram-бота от [@BotFather](https://t.me/BotFather)
 - Твой Telegram user ID — открой [@userinfobot](https://t.me/userinfobot), нажми **Start**, скопируй `Id`
 
-### Install
+### Установка
 
 ```bash
 git clone https://github.com/dediukhinpa/tg-claude-plugin ~/.claude/plugins/tg-channel
@@ -76,13 +78,13 @@ cd ~/.claude/plugins/tg-channel
 bun install
 ```
 
-### Configure
+### Конфигурация
 
 ```bash
-# 1. Create config (replace values)
+# 1. Создаём config.json (замени значения)
 BOT_TOKEN="1234567890:AAH_your_token_here"
-BOT_ID="${BOT_TOKEN%%:*}"    # extracts numeric part before the colon
-USER_ID="your_telegram_user_id"
+BOT_ID="${BOT_TOKEN%%:*}"    # число до двоеточия
+USER_ID="твой_telegram_user_id"
 
 cat > config.json <<EOF
 {
@@ -93,18 +95,18 @@ cat > config.json <<EOF
 }
 EOF
 
-# 2. Store token securely
+# 2. Сохраняем токен в файл
 STATE_DIR="$HOME/.claude/channels/tg-channel-default"
 mkdir -p "$STATE_DIR/secrets"
 echo "$BOT_TOKEN" > "$STATE_DIR/secrets/telegram-token"
 chmod 600 "$STATE_DIR/secrets/telegram-token"
 
-# 3. Optional: Groq for voice transcription
+# 3. Опционально: Groq для расшифровки голоса
 # echo "gsk_your_groq_key" > "$STATE_DIR/secrets/groq-api-key"
 # chmod 600 "$STATE_DIR/secrets/groq-api-key"
 ```
 
-### Launch
+### Запуск
 
 ```bash
 export TELEGRAM_BOT_TOKEN="$(cat $HOME/.claude/channels/tg-channel-default/secrets/telegram-token)"
@@ -115,96 +117,96 @@ claude --dangerously-skip-permissions \
        server:tg-channel
 ```
 
-The bot starts polling. Send it a message on Telegram.
+Бот начинает поллинг. Напиши ему в Telegram.
 
 ---
 
-## Configuration reference
+## Справочник по конфигурации
 
-`config.json` (full options):
+`config.json` (все параметры):
 
 ```jsonc
 {
-  "bot_id": 1234567890,           // required: numeric bot ID (before colon in token)
-  "dm_only": true,                // only accept DMs (recommended)
-  "allowed_user_ids": [111222],   // allowlist of Telegram user IDs
-  "allowed_chat_ids": [111222],   // allowlist of chat IDs (usually same as user IDs for DMs)
+  "bot_id": 1234567890,           // обязательно: числовой ID бота (часть токена до двоеточия)
+  "dm_only": true,                // принимать только личные сообщения (рекомендуется)
+  "allowed_user_ids": [111222],   // разрешённые Telegram user ID
+  "allowed_chat_ids": [111222],   // разрешённые chat ID (обычно совпадает с user ID для ЛС)
 
   "status": {
-    "enabled": false,             // show typing indicator while Claude thinks
+    "enabled": false,             // показывать индикатор печати пока Claude думает
     "interval_ms": 300,
-    "delete_on_complete": true    // delete typing message after reply
+    "delete_on_complete": true    // удалить сообщение-индикатор после ответа
   },
 
   "voice": {
-    "provider": "groq",           // groq is the only supported provider
-    "language": "ru",             // BCP-47 language code for Whisper
+    "provider": "groq",           // единственный поддерживаемый провайдер
+    "language": "ru",             // язык для Whisper (BCP-47)
     "model": "whisper-large-v3-turbo"
   },
 
   "webhook": {
-    "enabled": true,              // internal webhook for inter-agent signals
+    "enabled": true,              // внутренний вебхук для межагентных сигналов
     "host": "127.0.0.1",
     "port": 8089
   }
 }
 ```
 
-Environment variables (override config.json):
+Переменные окружения (перекрывают config.json):
 
-| Variable | Description |
-|----------|-------------|
-| `TELEGRAM_BOT_TOKEN` | Bot token from BotFather |
-| `TELEGRAM_STATE_DIR` | Directory for state files and secrets |
-| `GROQ_API_KEY` | Groq API key for voice transcription |
-
----
-
-## How it works
-
-```
-Telegram update
-     |
-     v
-  gate.ts         <- checks allowed_user_ids / dm_only
-     |
-     v
-  handlers.ts     <- text / voice / photo / document handlers
-     |  voice -> Groq Whisper -> transcript
-     |  photo -> downloads file, adds <media> tag
-     |
-     v
-  MCP channel     <- sends structured message to Claude Code
-     |
-     v
-  Claude thinks
-     |
-     +-- reply(chat_id, text)         -> Telegram message
-     +-- react(chat_id, msg_id, "👍") -> emoji reaction
-     +-- edit_message(...)            -> update sent message
-     +-- download_attachment(...)     -> read file bytes
-```
-
-The plugin is an MCP server. Claude Code loads it via `--dangerously-load-development-channels server:tg-channel` and receives inbound Telegram messages as channel events. Claude calls the tools above to respond.
+| Переменная | Описание |
+|------------|----------|
+| `TELEGRAM_BOT_TOKEN` | Токен бота от BotFather |
+| `TELEGRAM_STATE_DIR` | Директория для состояния и секретов |
+| `GROQ_API_KEY` | Groq API ключ для расшифровки голоса |
 
 ---
 
-## Persistent background agent
+## Как это работает
 
-To keep the bot running after you close the terminal, use tmux + systemd. See [lesson-05 of claude-ops-course](https://github.com/dediukhinpa/claude-ops-course/tree/main/lesson-05) for production-grade setup with watchdog, auto-restart, and orphan process cleanup.
+```
+Сообщение в Telegram
+     |
+     v
+  gate.ts         <- проверяет allowed_user_ids / dm_only
+     |
+     v
+  handlers.ts     <- обработчики текста / голоса / фото / документов
+     |  голос -> Groq Whisper -> транскрипт
+     |  фото  -> скачивает файл, добавляет тег <media>
+     |
+     v
+  MCP channel     <- передаёт структурированное сообщение в Claude Code
+     |
+     v
+  Claude думает
+     |
+     +-- reply(chat_id, text)         -> сообщение в Telegram
+     +-- react(chat_id, msg_id, "👍") -> эмодзи-реакция
+     +-- edit_message(...)            -> редактирование ответа
+     +-- download_attachment(...)     -> чтение байт файла
+```
 
-Quick tmux version:
+Плагин — MCP-сервер. Claude Code загружает его через `--dangerously-load-development-channels server:tg-channel` и получает входящие сообщения из Telegram как channel events. Для ответа Claude вызывает инструменты выше.
+
+---
+
+## Постоянный фоновый агент
+
+Чтобы бот продолжал работать после закрытия терминала, используй tmux + systemd. Полная продакшен-настройка с watchdog, авторестартом и очисткой зависших процессов — в [lesson-05 курса claude-ops-course](https://github.com/dediukhinpa/claude-ops-course/tree/main/lesson-05).
+
+Быстрый вариант с tmux:
 ```bash
 tmux new-session -d -s tg-bot \
   -e "TELEGRAM_BOT_TOKEN=$(cat ~/.claude/channels/tg-channel-default/secrets/telegram-token)" \
   -e "TELEGRAM_STATE_DIR=$HOME/.claude/channels/tg-channel-default" \
   "claude --dangerously-skip-permissions --dangerously-load-development-channels server:tg-channel"
 
-tmux attach -t tg-bot   # detach with Ctrl+B, D
+tmux attach -t tg-bot   # отсоединиться: Ctrl+B, затем D
 ```
 
 ---
 
-## License
+## Лицензия
 
 Apache 2.0
