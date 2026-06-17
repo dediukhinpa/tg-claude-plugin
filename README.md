@@ -16,46 +16,46 @@ You ──── Telegram ────► Claude Code ──► your codebase, t
 
 ---
 
-## One-prompt setup
+## Установка одним промптом
 
-Copy the block below into a **new Claude Code session**, fill in the three values, and send. Claude will clone the repo, install dependencies, and launch the bot.
+Скопируй блок ниже в **новую сессию Claude Code**, подставь свои значения и отправь. Claude сам склонирует репо, установит зависимости и запустит бота.
 
 ```
-Set up tg-channel — a Telegram plugin for Claude Code.
+Настрой tg-channel — Telegram-плагин для Claude Code.
 
-My credentials:
-  TELEGRAM_BOT_TOKEN = <your_bot_token>          # from @BotFather, format: 1234567890:AAH...
-  MY_TELEGRAM_USER_ID = <your_telegram_user_id>  # integer, get from @userinfobot
-  GROQ_API_KEY = <your_groq_key>                 # optional, for voice — skip if not needed
+Мои данные:
+  TELEGRAM_BOT_TOKEN = <токен от @BotFather>      # формат: 1234567890:AAH...
+  MY_TELEGRAM_USER_ID = <мой Telegram user ID>    # целое число, узнать через @userinfobot
+  GROQ_API_KEY = <ключ Groq>                       # опционально, для голоса — пропусти если не нужно
 
-Steps:
-1. Clone https://github.com/dediukhinpa/tg-claude-plugin into ~/.claude/plugins/tg-channel/
-2. Run `bun install` inside that directory (install bun first if missing: curl -fsSL https://bun.sh/install | bash)
-3. Parse bot_id from TELEGRAM_BOT_TOKEN: it's the number before the colon (e.g. "1234567890:AAH..." → 1234567890)
-4. Create ~/.claude/plugins/tg-channel/config.json:
+Шаги:
+1. Склонируй https://github.com/dediukhinpa/tg-claude-plugin в ~/.claude/plugins/tg-channel/
+2. Выполни `bun install` в этой директории (если bun не установлен: curl -fsSL https://bun.sh/install | bash)
+3. Извлеки bot_id из TELEGRAM_BOT_TOKEN — это число до двоеточия (например "1234567890:AAH..." → 1234567890)
+4. Создай ~/.claude/plugins/tg-channel/config.json:
    {
-     "bot_id": <parsed_bot_id>,
+     "bot_id": <извлечённый_bot_id>,
      "dm_only": true,
      "allowed_user_ids": [<MY_TELEGRAM_USER_ID>],
      "allowed_chat_ids": [<MY_TELEGRAM_USER_ID>]
    }
-5. Create the secrets directory: mkdir -p ~/.claude/channels/tg-channel-default/secrets
-6. Write token to file:
+5. Создай директорию для секретов: mkdir -p ~/.claude/channels/tg-channel-default/secrets
+6. Запиши токен в файл:
      echo '<TELEGRAM_BOT_TOKEN>' > ~/.claude/channels/tg-channel-default/secrets/telegram-token
      chmod 600 ~/.claude/channels/tg-channel-default/secrets/telegram-token
-7. If GROQ_API_KEY provided:
+7. Если указан GROQ_API_KEY:
      echo '<GROQ_API_KEY>' > ~/.claude/channels/tg-channel-default/secrets/groq-api-key
      chmod 600 ~/.claude/channels/tg-channel-default/secrets/groq-api-key
-8. Set env var and launch:
+8. Выстави переменные и запусти бота:
      export TELEGRAM_BOT_TOKEN=<TELEGRAM_BOT_TOKEN>
      export TELEGRAM_STATE_DIR=~/.claude/channels/tg-channel-default
      cd ~/.claude/plugins/tg-channel
      claude --dangerously-skip-permissions --dangerously-load-development-channels server:tg-channel
 
-Confirm each step as you go. At the end, show me the last 10 lines of the bot output.
+Подтверждай каждый шаг по мере выполнения. В конце покажи последние 10 строк вывода бота.
 ```
 
-> **Note:** `--dangerously-skip-permissions` disables Claude's permission prompts. Only use this in a dedicated session for the bot, not your main workspace.
+> **Важно:** `--dangerously-skip-permissions` отключает запросы разрешений у Claude. Используй только в отдельной сессии для бота, не в основном рабочем пространстве.
 
 ---
 
