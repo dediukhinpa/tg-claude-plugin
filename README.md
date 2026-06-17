@@ -25,7 +25,7 @@ You ──── Telegram ────► Claude Code ──► your codebase, t
 
 Мои данные:
   TELEGRAM_BOT_TOKEN = <токен от @BotFather>      # формат: 1234567890:AAH...
-  MY_TELEGRAM_USER_ID = <мой Telegram user ID>    # целое число, узнать через @userinfobot
+  MY_TELEGRAM_USER_ID = <мой Telegram user ID>    # открой @userinfobot → нажми Start → скопируй Id
   GROQ_API_KEY = <ключ Groq>                       # опционально, для голоса — пропусти если не нужно
 
 Шаги:
@@ -66,7 +66,7 @@ You ──── Telegram ────► Claude Code ──► your codebase, t
 - [Bun](https://bun.sh) >= 1.0
 - Claude Code CLI (`npm i -g @anthropic/claude-code`)
 - A Telegram bot token from [@BotFather](https://t.me/BotFather)
-- Your Telegram user ID (get it from [@userinfobot](https://t.me/userinfobot))
+- Твой Telegram user ID — открой [@userinfobot](https://t.me/userinfobot), нажми **Start**, скопируй `Id`
 
 ### Install
 
